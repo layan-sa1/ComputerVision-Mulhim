@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   cardBody: { padding: 10 },
   cardTitle: { fontSize: 12, fontWeight: "800", color: colors.text, textAlign: "right", lineHeight: 16 },
   cardMuscle: { fontSize: 10, color: colors.textSecondary, textAlign: "right", marginTop: 3 },
-  cardMeta: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" },
+  cardMeta: { flexDirection: "row-reverse", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" },
   metaDivider: { fontSize: 9, color: colors.border },
   levelGroup: { flexDirection: "row", alignItems: "center", gap: 4 },
   dots: { flexDirection: "row", gap: 2 },
