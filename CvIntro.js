@@ -39,7 +39,12 @@ export default function CvIntro({ onStart }) {
         </View>
 
         <View style={styles.mascotWrap}>
-          <Mascot size={110} pose="wave" />
+          <View style={styles.mascotStars}>
+            <Sparkles size={20} color={colors.accent} style={[styles.star, styles.starTopLeft]} />
+            <Sparkles size={14} color={colors.accent} style={[styles.star, styles.starTopRight]} />
+            <Sparkles size={16} color={colors.accent} style={[styles.star, styles.starBottomLeft]} />
+            <Mascot size={110} pose="wave" />
+          </View>
         </View>
 
         <View style={styles.featureCard}>
@@ -87,10 +92,15 @@ const styles = StyleSheet.create({
   privacyItem: { alignItems: "center", gap: 4, width: 76 },
   privacyItemLabel: { fontSize: 9, color: colors.textSecondary, textAlign: "center", lineHeight: 12 },
   mascotWrap: { alignItems: "center", paddingVertical: 20 },
+  mascotStars: { alignItems: "center", justifyContent: "center" },
+  star: { position: "absolute" },
+  starTopLeft: { top: 6, left: 18 },
+  starTopRight: { top: 22, right: 14 },
+  starBottomLeft: { bottom: 14, left: 4 },
   featureCard: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: 16, overflow: "hidden" },
-  featureRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, paddingVertical: 12 },
+  featureRow: { flexDirection: "row-reverse", alignItems: "center", gap: 10, paddingHorizontal: 14, paddingVertical: 12 },
   featureRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
-  featureText: { fontSize: 12, fontWeight: "600", color: colors.text },
+  featureText: { flex: 1, fontSize: 12, fontWeight: "600", color: colors.text, textAlign: "right" },
   footer: { paddingHorizontal: 20, paddingBottom: 16, paddingTop: 8, backgroundColor: colors.surface },
   ctaButton: { backgroundColor: colors.primary, borderRadius: 16, paddingVertical: 14, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
   ctaText: { color: "#FFFFFF", fontSize: 14, fontWeight: "800" },
