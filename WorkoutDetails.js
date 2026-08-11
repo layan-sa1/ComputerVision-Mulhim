@@ -29,8 +29,10 @@ export default function WorkoutDetails({ exercise, onBack, onNavTab, onSmartCorr
           <View style={{ width: 20 }} />
         </View>
 
-        {/* نفس صورة الكرت بالضبط — عشان تكون متسقة داخليًا وخارجيًا */}
-        <Image source={exercise.image} style={styles.photo} resizeMode="cover" />
+        {/* contain بدل cover عشان الصورة توضح التمرين كامل بدون تكبير/قص مبالغ فيه */}
+        <View style={styles.photoWrap}>
+          <Image source={exercise.image} style={styles.photo} resizeMode="contain" />
+        </View>
 
         <View style={styles.actionsRow}>
           <TouchableOpacity style={styles.addExerciseBtn} activeOpacity={0.85}>
@@ -107,7 +109,8 @@ const styles = StyleSheet.create({
   backChevron: { fontSize: 22, color: colors.text },
   title: { fontSize: 17, fontWeight: "800", color: colors.text },
   subtitle: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
-  photo: { marginHorizontal: 16, height: 220, borderRadius: 20, backgroundColor: "#3A4A4A", overflow: "hidden" },
+  photoWrap: { marginHorizontal: 16, height: 220, borderRadius: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, overflow: "hidden" },
+  photo: { width: "100%", height: "100%" },
   actionsRow: { flexDirection: "row-reverse", gap: 10, paddingHorizontal: 16, marginTop: 14 },
   addExerciseBtn: { flexDirection: "row-reverse", alignItems: "center", gap: 6, backgroundColor: colors.primary, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12 },
   addExerciseText: { color: "#FFFFFF", fontSize: 12, fontWeight: "800" },
