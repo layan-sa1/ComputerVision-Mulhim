@@ -3,6 +3,8 @@ import { View, Alert } from "react-native";
 import WorkoutsList from "./WorkoutsList";
 import WorkoutDetails from "./WorkoutDetails";
 import CvIntro from "./CvIntro";
+import Onboarding from "./onboarding";
+import RoundBreak from "./Roundbreak";
 
 // Simple state-based screen switcher — no expo-router here since Snack's
 // default template doesn't have it set up. Swap this out for real navigation
@@ -28,6 +30,7 @@ export default function App() {
           onNavTab={handleNavTab}
         />
       )}
+
       {screen === "details" && (
         <WorkoutDetails
           exercise={selectedExercise}
@@ -36,7 +39,21 @@ export default function App() {
           onSmartCorrect={() => setScreen("cvIntro")}
         />
       )}
-      {screen === "cvIntro" && <CvIntro onStart={() => setScreen("details")} />}
+
+      {/* مقدمة التصحيح الذكي → تودّي لخطوات التجهيز */}
+      {screen === "cvIntro" && (
+        <CvIntro onStart={() => setScreen("onboarding")} />
+      )}
+
+      {/* خطوات تجهيز الكاميرا (الحامل، المساحة، الإضاءة، الملابس) */}
+      {screen === "onboarding" && (
+        <Onboarding onFinish={() => setScreen("roundBreak")} />
+      )}
+
+      {/* الراحة بين الجولات: العدّاد → الاستراحة → يرجع للتمرين */}
+      {screen === "roundBreak" && (
+        <RoundBreak onFinish={() => setScreen("details")} />
+      )}
     </View>
   );
 }
