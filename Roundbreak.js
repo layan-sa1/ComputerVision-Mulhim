@@ -1,0 +1,346 @@
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+  Dimensions,
+} from "react-native";
+import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import Svg, { Circle } from "react-native-svg";
+import colors from "./Colors";
+
+// شاشتا ما بين الجولات:
+//   1) العدّاد ("استعد" 3،2،1) — دائرة تقدّم حقيقية تتحرك.
+//   2) الاستراحة ("أنهيت الجولة") — ماسكوت + عدّاد 00:25 + كاروسيل نصائح.
+// التدفق: عدّاد "المجموعة التالية" → الاستراحة "أنهيت الجولة" → عدّاد "الجولة التالية" → onFinish.
+//
+// ⬇️ ارفعي صورة الماسكوت للريبو داخل assets بهذا الاسم (أو غيّري الرابط تحت):
+//    mascot-celebrate.png
+const A =
+  "https://raw.githubusercontent.com/layan-sa1/ComputerVision-Mulhim/main/assets";
+const MASCOT_CELEBRATE = `${A}/mascot-celebrate.png`;
+
+const { width: SCREEN_W } = Dimensions.get("window");
+
+/* ملاحظات الأداء — عدّاد ما قبل الاستراحة (المجموعة التالية) */
+const FEEDBACK_BEFORE = {
+  header: "المجموعة التالية تبدأ خلال",
+  tone: "good", // "good" أخضر / "warn" ذهبي
+  text: "لاحظنا أن عمق نزولك كان أقل من المثالي في المجموعة السابقة. حاول النزول أعمق للحفاظ على استهداف العضلة بشكل أفضل.",
+};
+
+/* ملاحظات الأداء — عدّاد ما بعد الاستراحة (الجولة التالية) */
+const FEEDBACK_AFTER = {
+  header: "الجولة التالية تبدأ خلال",
+  tone: "good",
+  text: "أداؤك في الجولة الماضية رائع! لكن لاحظنا أن استقرار الجذع كان يحتاج تحسين. حافظ على شدّ بطنك أثناء الحركة في الجولة القادمة.",
+};
+
+/* نصائح كاروسيل الاستراحة */
+const REST_TIPS = [
+  {
+    icon: <Ionicons name="water" size={26} color={colors.primary} />,
+    title: "نصيحة مهمة",
+    text: "تأكد من شرب كمية كافية من الماء بين الجولات لتعويض السوائل ودعم أدائك.",
+  },
+  {
+    icon: <Feather name="wind" size={26} color={colors.primary} />,
+    title: "تنفّس بعمق",
+    text: "خذ نفسًا عميقًا وبطيئًا لتهدئة معدل ضربات القلب قبل الجولة التالية.",
+  },
+  {
+    icon: <MaterialCommunityIcons name="run-fast" size={26} color={colors.primary} />,
+    title: "استعد ذهنيًا",
+    text: "تخيّل الحركة الصحيحة قبل تنفيذها — التركيز يرفع دقة الأداء.",
+  },
+  {
+    icon: <Ionicons name="fitness" size={26} color={colors.primary} />,
+    title: "حافظ على وضعيتك",
+    text: "ابقِ ظهرك مستقيمًا وكتفيك مرتخيين لتفادي الإجهاد وتحسين النتائج.",
+  },
+];
+
+export default function RoundBreak({ onFinish = () => {} }) {
+  // التدفق: عدّاد المجموعة التالية → الاستراحة → عدّاد الجولة التالية → onFinish
+  const [phase, setPhase] = useState("countdownBefore");
+
+  if (phase === "countdownBefore") {
+    return (
+      <CountdownScreen
+        seconds={3}
+        header={FEEDBACK_BEFORE.header}
+        feedback={FEEDBACK_BEFORE}
+        onDone={() => setPhase("rest")}
+      />
+    );
+  }
+
+  if (phase === "rest") {
+    return (
+      <RestScreen
+        seconds={10}
+        mascotUri={MASCOT_CELEBRATE}
+        tips={REST_TIPS}
+        onDone={() => setPhase("countdownAfter")}
+      />
+    );
+  }
+
+  return (
+    <CountdownScreen
+      seconds={3}
+      header={FEEDBACK_AFTER.header}
+      feedback={FEEDBACK_AFTER}
+      onDone={onFinish}
+    />
+  );
+}
+
+/* ============ دائرة التقدّم (شغّالة) ============ */
+function Ring({ size, stroke, progress, color, track = colors.border, dashed, children }) {
+  const radius = (size - stroke) / 2;
+  const circ = 2 * Math.PI * radius;
+  const clamped = Math.max(0, Math.min(1, progress));
+  const center = size / 2;
+
+  return (
+    <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
+      <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
+        {/* المسار (خلفية) */}
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={track}
+          strokeWidth={stroke}
+          fill="none"
+          strokeDasharray={dashed ? "2 7" : undefined}
+          strokeLinecap="round"
+        />
+        {/* القوس المتحرك */}
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={color}
+          strokeWidth={stroke}
+          fill="none"
+          strokeDasharray={`${circ} ${circ}`}
+          strokeDashoffset={circ * (1 - clamped)}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${center} ${center})`}
+        />
+      </Svg>
+      {children}
+    </View>
+  );
+}
+
+/* ============ شاشة العدّاد "استعد" ============ */
+function CountdownScreen({ seconds, header, feedback, onDone }) {
+  const [remaining, setRemaining] = useState(seconds);
+
+  useEffect(() => {
+    if (remaining <= 0) {
+      onDone();
+      return;
+    }
+    const id = setTimeout(() => {
+      setRemaining((r) => Math.max(0, +(r - 0.05).toFixed(2)));
+    }, 50);
+    return () => clearTimeout(id);
+  }, [remaining]);
+
+  const toneColor = feedback.tone === "warn" ? colors.warning : colors.success;
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.countWrap}>
+        <Text style={styles.header}>{header}</Text>
+
+        <Ring
+          size={200}
+          stroke={9}
+          progress={remaining / seconds}
+          color={colors.primary}
+          dashed
+        >
+          <View style={styles.ringCenter}>
+            <Text style={styles.bigNumber}>{Math.max(1, Math.ceil(remaining))}</Text>
+            <Text style={styles.readyLabel}>استعد</Text>
+          </View>
+        </Ring>
+      </View>
+
+      {/* بطاقة ملاحظة الأداء */}
+      <View style={styles.footerArea}>
+        <View style={styles.feedbackCard}>
+          <View style={[styles.feedbackIcon, { backgroundColor: `${toneColor}18` }]}>
+            <Ionicons name="fitness" size={18} color={toneColor} />
+          </View>
+          <Text style={styles.feedbackText}>{feedback.text}</Text>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+/* ============ شاشة الاستراحة ============ */
+function RestScreen({ seconds, mascotUri, tips, onDone }) {
+  const [remaining, setRemaining] = useState(seconds);
+  const [activeTip, setActiveTip] = useState(0);
+
+  useEffect(() => {
+    if (remaining <= 0) {
+      onDone();
+      return;
+    }
+    const id = setTimeout(() => {
+      setRemaining((r) => Math.max(0, +(r - 0.05).toFixed(2)));
+    }, 50);
+    return () => clearTimeout(id);
+  }, [remaining]);
+
+  const mmss = () => {
+    const s = Math.ceil(remaining);
+    const m = String(Math.floor(s / 60)).padStart(2, "0");
+    const sec = String(s % 60).padStart(2, "0");
+    return `${m}:${sec}`;
+  };
+
+  const cardW = SCREEN_W - 40;
+  const onScroll = (e) => {
+    const i = Math.round(e.nativeEvent.contentOffset.x / cardW);
+    if (i !== activeTip) setActiveTip(i);
+  };
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.restScroll} showsVerticalScrollIndicator={false}>
+        <View style={styles.restTitleRow}>
+          <Text style={styles.restTitle}>أنهيت الجولة!</Text>
+          <Text style={styles.restEmoji}>🎉</Text>
+        </View>
+        <Text style={styles.restSubtitle}>أحسنت، استمر على هذا الأداء!</Text>
+
+        <View style={styles.mascotWrap}>
+          <Ionicons name="sparkles" size={20} color={colors.accent} style={[styles.mStar, { top: 14, left: 48 }]} />
+          <Ionicons name="sparkles" size={14} color={colors.accent} style={[styles.mStar, { top: 40, right: 52 }]} />
+          <Ionicons name="sparkles" size={16} color={colors.accent} style={[styles.mStar, { bottom: 30, left: 64 }]} />
+          <Ionicons name="sparkles" size={12} color={colors.accent} style={[styles.mStar, { bottom: 46, right: 62 }]} />
+          <Image source={{ uri: mascotUri }} style={styles.mascotImg} resizeMode="contain" />
+        </View>
+
+        <Text style={styles.restLabel}>راحة قبل الجولة التالية</Text>
+
+        <Ring size={130} stroke={7} progress={remaining / seconds} color={colors.primary} dashed>
+          <Text style={styles.timerText}>{mmss()}</Text>
+        </Ring>
+        <Ionicons name="heart" size={20} color={colors.success} style={{ marginTop: 12 }} />
+
+        {/* تلميح السحب */}
+        <View style={styles.swipeHint}>
+          <Feather name="arrow-left" size={13} color={colors.textLight} />
+          <Text style={styles.swipeHintText}>اسحب لليسار أو اليمين لعرض المزيد</Text>
+          <Feather name="arrow-right" size={13} color={colors.textLight} />
+        </View>
+
+        {/* كاروسيل النصائح */}
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          style={{ width: cardW }}
+        >
+          {tips.map((tip, i) => (
+            <View key={i} style={[styles.tipCard, { width: cardW }]}>
+              <View style={styles.tipContent}>
+                <View style={styles.tipTextCol}>
+                  <Text style={styles.tipTitle}>{tip.title}</Text>
+                  <Text style={styles.tipText}>{tip.text}</Text>
+                </View>
+                <View style={styles.tipIcon}>{tip.icon}</View>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* النقاط */}
+        <View style={styles.dots}>
+          {tips.map((_, i) => (
+            <View key={i} style={[styles.dot, i === activeTip ? styles.dotActive : styles.dotInactive]} />
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.surface },
+
+  /* العدّاد */
+  countWrap: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 20 },
+  header: { fontSize: 18, fontWeight: "800", color: colors.primary, textAlign: "center", lineHeight: 28, marginBottom: 40 },
+  ringCenter: { alignItems: "center", justifyContent: "center" },
+  bigNumber: { fontSize: 72, fontWeight: "800", color: colors.text, lineHeight: 82 },
+  readyLabel: { fontSize: 15, fontWeight: "700", color: colors.success, marginTop: -4 },
+
+  footerArea: { paddingHorizontal: 20, paddingBottom: 24 },
+  feedbackCard: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    padding: 14,
+  },
+  feedbackIcon: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
+  feedbackText: { flex: 1, fontSize: 13, color: colors.text, textAlign: "right", lineHeight: 20 },
+
+  /* الاستراحة */
+  restScroll: { alignItems: "center", paddingHorizontal: 20, paddingTop: 16, paddingBottom: 28 },
+  restTitleRow: { flexDirection: "row-reverse", alignItems: "center", gap: 8 },
+  restTitle: { fontSize: 27, fontWeight: "800", color: colors.primary },
+  restEmoji: { fontSize: 24 },
+  restSubtitle: { fontSize: 15, color: colors.textSecondary, textAlign: "center", marginTop: 8 },
+
+  mascotWrap: { alignItems: "center", justifyContent: "center", marginVertical: 24, width: 240, height: 240 },
+  mStar: { position: "absolute" },
+  mascotImg: { width: 210, height: 210 },
+
+  restLabel: { fontSize: 15, fontWeight: "700", color: colors.text, marginTop: 20, marginBottom: 18 },
+  timerText: { fontSize: 30, fontWeight: "800", color: colors.text },
+
+  swipeHint: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 24, marginBottom: 12 },
+  swipeHintText: { fontSize: 11, color: colors.textLight, fontWeight: "600" },
+
+  tipCard: { paddingHorizontal: 2 },
+  tipContent: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    gap: 14,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    padding: 16,
+  },
+  tipTextCol: { flex: 1 },
+  tipTitle: { fontSize: 13, fontWeight: "800", color: colors.primary, textAlign: "right", marginBottom: 6 },
+  tipText: { fontSize: 12, color: colors.textSecondary, textAlign: "right", lineHeight: 19 },
+  tipIcon: { width: 44, height: 44, borderRadius: 12, backgroundColor: `${colors.primary}10`, alignItems: "center", justifyContent: "center" },
+
+  dots: { flexDirection: "row", gap: 6, marginTop: 16 },
+  dot: { width: 7, height: 7, borderRadius: 4 },
+  dotActive: { backgroundColor: colors.primary, width: 20 },
+  dotInactive: { backgroundColor: colors.border },
+});
