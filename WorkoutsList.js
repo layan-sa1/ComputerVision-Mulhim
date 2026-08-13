@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, Image } from "react-native";
-import { Search, SlidersHorizontal, Plus, Sparkles, Grid2x2, Shirt, Backpack, CircleDot, Dumbbell, Footprints } from "lucide-react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, SafeAreaView } from "react-native";
+import { Search, SlidersHorizontal, Plus, Sparkles, Grid2x2, Shirt, Backpack, CircleDot, Dumbbell, Footprints } from "./icons";
 import colors from "./Colors";
 import BottomNav from "./BottomNav";
 import EXERCISES, { LEVEL_COLORS } from "./ExercisesData";
@@ -14,10 +14,12 @@ const FILTERS = [
   { key: "leg", label: "رجل", Icon: Footprints },
 ];
 
+const DIFFICULTY_STEPS = { مبتدئ: 1, متوسط: 2, متقدم: 3 };
+
 export default function WorkoutsList({ onOpenExercise, onNavTab }) {
   const [activeFilter, setActiveFilter] = useState("all");
 
-  const visibleExercises = activeFilter === "all" ? EXERCISES : EXERCISES.filter((ex) => ex.muscleKey === activeFilter);
+  const filtered = activeFilter === "all" ? EXERCISES : EXERCISES.filter((e) => e.muscleKey === activeFilter);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -36,8 +38,6 @@ export default function WorkoutsList({ onOpenExercise, onNavTab }) {
         </TouchableOpacity>
       </View>
 
-      {/* الحيلة هنا: نعكس الـ ScrollView كامل (scaleX: -1) عشان "الكل" يبدأ من اليمين
-          بدون سحب، وبعدين نعكس كل شريحة لحالها عشان النص والأيقونة يرجعوا طبيعيين */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -60,38 +60,37 @@ export default function WorkoutsList({ onOpenExercise, onNavTab }) {
       </ScrollView>
 
       <ScrollView contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
-        {visibleExercises.map((ex) => (
-          <TouchableOpacity key={ex.id} style={styles.card} activeOpacity={0.9} onPress={() => onOpenExercise(ex)}>
-            <View style={styles.cardImage}>
-              <Image source={ex.image} style={styles.cardImagePhoto} resizeMode="cover" />
-              <View style={styles.smartBadge}>
-                <Sparkles size={9} color={colors.primary} />
-                <Text style={styles.smartBadgeText}>تصحيح ذكي</Text>
+        {filtered.map((ex) => {
+          const dots = DIFFICULTY_STEPS[ex.level] || 1;
+          const levelColor = LEVEL_COLORS[ex.level] || colors.primary;
+          return (
+            <TouchableOpacity key={ex.id} style={styles.card} activeOpacity={0.9} onPress={() => onOpenExercise(ex.id)}>
+              <View style={styles.cardImage}>
+                <Image source={ex.image} style={styles.cardImagePhoto} resizeMode="cover" />
+                <View style={styles.smartBadge}>
+                  <Sparkles size={9} color={colors.primary} />
+                  <Text style={styles.smartBadgeText}>تصحيح ذكي</Text>
+                </View>
+                <TouchableOpacity style={styles.addBtn}>
+                  <Plus size={14} color="#FFFFFF" />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity style={styles.addBtn} onPress={(e) => e.stopPropagation()}>
-                <Plus size={14} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.cardBody}>
-              <Text style={styles.cardTitle} numberOfLines={2}>{ex.name}</Text>
-              <Text style={styles.cardMuscle}>{ex.muscle}</Text>
-              <View style={styles.cardMeta}>
-                <Text style={styles.cardMetaText}>{ex.reps}</Text>
-                <Text style={styles.metaDivider}>|</Text>
-                <Text style={styles.cardMetaText}>{ex.sets}</Text>
-                <Text style={styles.metaDivider}>|</Text>
-                <View style={styles.levelGroup}>
-                  <Text style={[styles.cardMetaText, { color: LEVEL_COLORS[ex.level], fontWeight: "700" }]}>{ex.level}</Text>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle} numberOfLines={2}>{ex.name}</Text>
+                <Text style={styles.cardMuscle}>{ex.muscle}</Text>
+                <View style={styles.cardMeta}>
                   <View style={styles.dots}>
                     {[0, 1, 2].map((i) => (
-                      <View key={i} style={[styles.dot, { backgroundColor: LEVEL_COLORS[ex.level] }]} />
+                      <View key={i} style={[styles.dot, { backgroundColor: i < dots ? levelColor : colors.border }]} />
                     ))}
                   </View>
+                  <Text style={styles.cardMetaText}>{ex.sets}</Text>
+                  <Text style={styles.cardMetaText}>{ex.reps}</Text>
                 </View>
               </View>
-            </View>
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       <BottomNav active="workouts" onChange={onNavTab} />
@@ -116,16 +115,14 @@ const styles = StyleSheet.create({
   grid: { paddingHorizontal: 16, flexDirection: "row", flexWrap: "wrap", gap: 12, paddingBottom: 12 },
   card: { width: "47%", borderRadius: 16, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, overflow: "hidden" },
   cardImage: { height: 100, backgroundColor: colors.surface, justifyContent: "flex-end" },
-  cardImagePhoto: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, width: "100%", height: "100%" },
+  cardImagePhoto: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
   smartBadge: { position: "absolute", top: 6, right: 6, flexDirection: "row", alignItems: "center", gap: 3, backgroundColor: "#FFFFFF", paddingHorizontal: 6, paddingVertical: 3, borderRadius: 8 },
   smartBadgeText: { fontSize: 8, fontWeight: "700", color: colors.text },
   addBtn: { position: "absolute", bottom: 6, left: 6, width: 24, height: 24, borderRadius: 12, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" },
   cardBody: { padding: 10 },
   cardTitle: { fontSize: 12, fontWeight: "800", color: colors.text, textAlign: "right", lineHeight: 16 },
   cardMuscle: { fontSize: 10, color: colors.textSecondary, textAlign: "right", marginTop: 3 },
-  cardMeta: { flexDirection: "row-reverse", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" },
-  metaDivider: { fontSize: 9, color: colors.border },
-  levelGroup: { flexDirection: "row", alignItems: "center", gap: 4 },
+  cardMeta: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 6 },
   dots: { flexDirection: "row", gap: 2 },
   dot: { width: 5, height: 5, borderRadius: 2.5 },
   cardMetaText: { fontSize: 9, color: colors.textSecondary },

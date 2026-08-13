@@ -1,19 +1,15 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Image } from "react-native";
-import { ChevronDown, ChevronUp, Plus, Sparkles, Camera, Hand, ClipboardList } from "lucide-react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView } from "react-native";
+import { ChevronDown, ChevronUp, Plus, Sparkles, Camera, Hand, ClipboardList } from "./icons";
 import colors from "./Colors";
 import BottomNav from "./BottomNav";
+import EXERCISES from "./ExercisesData";
 
-// رسمة العضلات المستهدفة (أمامي/خلفي) — لسا ماعندنا صور حقيقية لها.
-// بدّليها بـ require("./assets/quad-front.png") و require("./assets/quad-back.png") لو ضفتيهم لاحقًا.
-const MUSCLE_IMAGE_FRONT = null;
-const MUSCLE_IMAGE_BACK = null;
-
-export default function WorkoutDetails({ exercise, onBack, onNavTab, onSmartCorrect }) {
+export default function WorkoutDetails({ exerciseId, onBack, onNavTab, onSmartCorrection }) {
   const [musclesOpen, setMusclesOpen] = useState(true);
   const [stepsOpen, setStepsOpen] = useState(true);
 
-  if (!exercise) return null;
+  const ex = EXERCISES.find((e) => e.id === exerciseId) || EXERCISES[0];
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -23,23 +19,20 @@ export default function WorkoutDetails({ exercise, onBack, onNavTab, onSmartCorr
             <Text style={styles.backChevron}>‹</Text>
           </TouchableOpacity>
           <View style={{ alignItems: "center" }}>
-            <Text style={styles.title}>{exercise.name}</Text>
-            <Text style={styles.subtitle}>{exercise.subtitle}</Text>
+            <Text style={styles.title}>{ex.name}</Text>
+            <Text style={styles.subtitle}>{ex.subtitle}</Text>
           </View>
           <View style={{ width: 20 }} />
         </View>
 
-        {/* contain بدل cover عشان الصورة توضح التمرين كامل بدون تكبير/قص مبالغ فيه */}
-        <View style={styles.photoWrap}>
-          <Image source={exercise.image} style={styles.photo} resizeMode="contain" />
-        </View>
+        <Image source={ex.image} style={styles.photo} resizeMode="cover" />
 
         <View style={styles.actionsRow}>
           <TouchableOpacity style={styles.addExerciseBtn} activeOpacity={0.85}>
             <Plus size={15} color="#FFFFFF" />
             <Text style={styles.addExerciseText}>أضف التمرين</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.smartCorrectBtn} activeOpacity={0.85} onPress={onSmartCorrect}>
+          <TouchableOpacity style={styles.smartCorrectBtn} activeOpacity={0.85} onPress={onSmartCorrection}>
             <Sparkles size={13} color={colors.primary} />
             <Text style={styles.smartCorrectText}>جرّب التصحيح الذكي</Text>
             <Camera size={13} color={colors.primary} />
@@ -48,19 +41,11 @@ export default function WorkoutDetails({ exercise, onBack, onNavTab, onSmartCorr
 
         <Accordion title="العضلات المستهدفة" Icon={Hand} open={musclesOpen} onToggle={() => setMusclesOpen((s) => !s)}>
           <View style={styles.muscleDiagramRow}>
-            {MUSCLE_IMAGE_FRONT ? (
-              <Image source={MUSCLE_IMAGE_FRONT} style={styles.muscleFigure} resizeMode="contain" />
-            ) : (
-              <View style={styles.muscleFigure} />
-            )}
-            {MUSCLE_IMAGE_BACK ? (
-              <Image source={MUSCLE_IMAGE_BACK} style={styles.muscleFigure} resizeMode="contain" />
-            ) : (
-              <View style={styles.muscleFigure} />
-            )}
+            <View style={styles.muscleFigure} />
+            <View style={styles.muscleFigure} />
           </View>
           <View style={styles.muscleList}>
-            {exercise.targetMuscles.map((m) => (
+            {ex.targetMuscles.map((m) => (
               <View key={m} style={styles.muscleItem}>
                 <Text style={styles.muscleItemText}>{m}</Text>
                 <View style={styles.muscleDot} />
@@ -71,7 +56,7 @@ export default function WorkoutDetails({ exercise, onBack, onNavTab, onSmartCorr
 
         <Accordion title="كيفية أداء التمرين" Icon={ClipboardList} open={stepsOpen} onToggle={() => setStepsOpen((s) => !s)}>
           <View style={{ gap: 12 }}>
-            {exercise.steps.map((step, i) => (
+            {ex.steps.map((step, i) => (
               <View key={i} style={styles.stepRow}>
                 <Text style={styles.stepText}>{step}</Text>
                 <View style={styles.stepNumber}>
@@ -109,8 +94,7 @@ const styles = StyleSheet.create({
   backChevron: { fontSize: 22, color: colors.text },
   title: { fontSize: 17, fontWeight: "800", color: colors.text },
   subtitle: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
-  photoWrap: { marginHorizontal: 16, height: 220, borderRadius: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, overflow: "hidden" },
-  photo: { width: "100%", height: "100%" },
+  photo: { marginHorizontal: 16, height: 220, borderRadius: 20, backgroundColor: colors.surfaceMuted || colors.surface, width: undefined, alignSelf: "stretch" },
   actionsRow: { flexDirection: "row-reverse", gap: 10, paddingHorizontal: 16, marginTop: 14 },
   addExerciseBtn: { flexDirection: "row-reverse", alignItems: "center", gap: 6, backgroundColor: colors.primary, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12 },
   addExerciseText: { color: "#FFFFFF", fontSize: 12, fontWeight: "800" },

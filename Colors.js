@@ -2,7 +2,7 @@ export default {
   primary: "#27535F",
   secondary: "#a8947a",
   accent: "#F7931E",
-  success: "#2ECC71",
+  success: "#1F9E8C",
   warning: "#F39C12",
   danger: "#E74C3C",
   background: "#FFFFFF",

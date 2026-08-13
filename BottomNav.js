@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
-import { Dumbbell, UtensilsCrossed, Plus, Sparkles, Home } from "lucide-react-native";
+import { Dumbbell, UtensilsCrossed, Plus, Sparkles, Home } from "./icons";
 import colors from "./Colors";
 
 export default function BottomNav({ active = "workouts", onChange = () => {} }) {

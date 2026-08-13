@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
-import { EyeOff, ShieldCheck, Smartphone, Target, BarChart3, Lightbulb, TrendingUp, Sparkles } from "lucide-react-native";
+import { EyeOff, ShieldCheck, Smartphone, Target, BarChart3, Lightbulb, TrendingUp, Sparkles } from "./icons";
 import colors from "./Colors";
 import Mascot from "./Mascot";
 
@@ -9,6 +9,7 @@ const FEATURES = [
   { Icon: BarChart3, title: "تقييم دقة الأداء" },
   { Icon: Lightbulb, title: "تجربة مخصصة لك" },
   { Icon: TrendingUp, title: "متابعة تطور أدائك" },
+   { Icon: ShieldCheck, title: "خصوصيتك أولويتنا، بدون تسجيل أو مشاركة لبياناتك" },
 ];
 
 export default function CvIntro({ onStart }) {
@@ -23,21 +24,9 @@ export default function CvIntro({ onStart }) {
         </View>
 
         <Text style={styles.brand}>ملهم</Text>
-        <Text style={styles.headline}>مدربك الذكي{"\n"}لتصحيح حركاتك</Text>
+        <Text style={styles.headline}>مدربك الذكي </Text>
         <Text style={styles.subline}>تدريب ذكي، نتائج أفضل.</Text>
-
-        <View style={styles.privacyCard}>
-          <View style={styles.privacyTitleRow}>
-            <ShieldCheck size={14} color={colors.primary} />
-            <Text style={styles.privacyTitle}>خصوصيتك أولويتنا</Text>
-          </View>
-          <View style={styles.privacyItems}>
-            <PrivacyItem Icon={EyeOff} label="لا يتم التسجيل" />
-            <PrivacyItem Icon={ShieldCheck} label="لا يتم المشاركة" />
-            <PrivacyItem Icon={Smartphone} label="معالجة محلية وآمنة" />
-          </View>
-        </View>
-
+        
         <View style={styles.mascotWrap}>
           <View style={styles.mascotStars}>
             <Sparkles size={20} color={colors.accent} style={[styles.star, styles.starTopLeft]} />

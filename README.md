@@ -1,21 +1,11 @@
-# للزميلات: كيف تشتغلون على المشروع من GitHub داخل Snack
+# Sample Snack app
 
-**ما تحتاجون تنسخون الملفات يدويًا واحد واحد.** بدل كذا، Snack يقدر يستورد المستودع كامل مباشرة:
+Open the `App.js` file to start writing some code. You can preview the changes directly on your phone or tablet by scanning the **QR code** or use the iOS or Android emulators. When you're done, click **Save** and share the link!
 
-1. روحي https://snack.expo.dev — تقدرين تستوردين وتشوفين المعاينة **بدون ما تسوّين حساب**.
-2. من قائمة الملفات (زر "..." أو زر الاستيراد بالأعلى)، اختاري **"Import git repository"**.
-3. الصقي رابط هذا المستودع على GitHub واضغطي استيراد — بيجيب كل الملفات والصور تلقائيًا (App.js, WorkoutsList.js, WorkoutDetails.js, CvIntro.js, assets... إلخ) بنفس الهيكلة.
-4. بعدها المشروع يصير بيئة Snack واحدة، وتقدرين تضيفين ملفاتك الجديدة أو تعدّلين على الموجود بنفس المحرر عادي.
+When you're ready to see everything that Expo provides (or if you want to use your own editor) you can **Download** your project and use it with [expo cli](https://docs.expo.dev/get-started/installation/#expo-cli)).
 
-**⚠️ لو بس تبين تشوفين المعاينة (Preview) بدون تعديل حقيقي:**
-ما تحتاجين حساب أبدًا — افتحي، استوردي، وشوفي النتيجة على طول.
+All projects created in Snack are publicly available, so you can easily share the link to this project via link, or embed it on a web page with the `<>` button.
 
-**⚠️ لكن لو ناوية تعدّلين وتبين تحفظين شغلك:**
-لازم تسوّين حساب Expo (مجاني) وتسجّلين دخول **قبل** لا تبدين. لأنه بدون حساب:
-- التعديلات ما تنحفظ تلقائيًا.
-- لو أعدتي تحميل الصفحة (Refresh) أو سكّرتيها، شغلك بيضيع كامل ومارح تقدرين ترجعين له.
+If you're having problems, you can tweet to us [@expo](https://twitter.com/expo) or ask in our [forums](https://forums.expo.dev/c/expo-dev-tools/61) or [Discord](https://chat.expo.dev/).
 
-**⚠️ مهم — حتى مع الحساب، الاستيراد اتجاه واحد بس:**
-الاستيراد يجيب نسخة من GitHub وقت ما تسوّينه، لكن Snack **ما يرفع تعديلاتك رجوع للمستودع تلقائيًا**. يعني بعد ما تخلصين تعديلاتك:
-- انسخي الكود من كل ملف عدّلتي عليه (أو حمّليه من Snack)، وارفعيه (commit/push) لمستودع GitHub بنفسك.
-- الأفضل تسوّين ذلك على **فرع (branch) خاص فيك** وترفعينه كـ Pull Request، عشان ما يصير تعارض مع تعديلات زميلاتك الثانيات اللي شغالات بنفس الوقت..
+Snack is Open Source. You can find the code on the [GitHub repo](https://github.com/expo/snack).
