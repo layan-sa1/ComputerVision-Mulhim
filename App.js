@@ -304,6 +304,10 @@ export default function App() {
             setScreen("onboarding")
           }
 
+          onBack={() =>
+            setScreen("details")
+          }
+
         />
 
       )}
@@ -319,6 +323,10 @@ export default function App() {
 
           onFinish={() =>
             setScreen("poseCheck")
+          }
+
+          onBack={() =>
+            setScreen("cvIntro")
           }
 
         />
@@ -392,6 +400,10 @@ export default function App() {
 
           onFinish={handleBreakDone}
 
+          onBack={() =>
+            setScreen("activeWorkout")
+          }
+
         />
 
       )}
@@ -409,6 +421,10 @@ export default function App() {
 
           onFinish={handleBreakDone}
 
+          onBack={() =>
+            setScreen("activeWorkout")
+          }
+
         />
 
       )}
@@ -424,6 +440,10 @@ export default function App() {
 
           onContinue={() =>
             setScreen("shareSummary")
+          }
+
+          onBack={() =>
+            setScreen("activeWorkout")
           }
 
         />
