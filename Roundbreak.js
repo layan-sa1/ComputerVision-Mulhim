@@ -22,7 +22,7 @@ import colors from "./Colors";
 //    mascot-celebrate.png
 const MASCOT_CELEBRATE = require("./assets/mascot-celebrate.png");
 
-const { width: SCREEN_W } = Dimensions.get("window");
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
 /* ملاحظات الأداء — عدّاد ما قبل الاستراحة (المجموعة التالية) */
 const FEEDBACK_BEFORE = {
@@ -62,51 +62,86 @@ const REST_TIPS = [
   },
 ];
 
-export default function RoundBreak({ onFinish = () => {}, mode = "round" }) {
+export default function RoundBreak({ onFinish = () => {}, onBack, mode = "round" }) {
   // mode="set"   -> بعد إنهاء مجموعة عادية: عدّاد "المجموعة التالية" بس، ثم onFinish مباشرة.
   // mode="round" -> بعد إنهاء جولة كاملة: عدّاد → راحة/احتفال → عدّاد "الجولة التالية" → onFinish.
-  const [phase, setPhase] = useState("countdownBefore");
+  const phases = mode === "set" ? ["countdownBefore"] : ["countdownBefore", "rest", "countdownAfter"];
+  const [phaseIndex, setPhaseIndex] = useState(0);
+  const phase = phases[phaseIndex];
 
-  useEffect(() => {
-    if (phase === "done") onFinish();
-  }, [phase]);
+  // الضغط يمين = التالي (زي ما يسويه العدّاد تلقائيًا لما يخلص)
+  // الضغط يسار = السابق — ولو إحنا بأول شاشة، يرجع للي قبل RoundBreak بالكامل
+  const goNext = () => {
+    if (phaseIndex >= phases.length - 1) {
+      onFinish();
+    } else {
+      setPhaseIndex((i) => i + 1);
+    }
+  };
+  const goPrev = () => {
+    if (phaseIndex <= 0) {
+      onBack && onBack();
+    } else {
+      setPhaseIndex((i) => i - 1);
+    }
+  };
 
+  let content;
   if (phase === "countdownBefore") {
-    return (
-      <CountdownScreen
-        seconds={3}
-        header={FEEDBACK_BEFORE.header}
-        feedback={FEEDBACK_BEFORE}
-        onDone={() => setPhase(mode === "set" ? "done" : "rest")}
-      />
+    content = (
+      <TapNavWrapper onPrev={goPrev} onNext={goNext}>
+        <CountdownScreen seconds={3} header={FEEDBACK_BEFORE.header} feedback={FEEDBACK_BEFORE} onDone={goNext} />
+      </TapNavWrapper>
+    );
+  } else if (phase === "rest") {
+    content = (
+      <RestTapNavWrapper onPrev={goPrev} onNext={goNext}>
+        <RestScreen seconds={10} mascotUri={MASCOT_CELEBRATE} tips={REST_TIPS} onDone={goNext} />
+      </RestTapNavWrapper>
+    );
+  } else {
+    content = (
+      <TapNavWrapper onPrev={goPrev} onNext={goNext}>
+        <CountdownScreen seconds={3} header={FEEDBACK_AFTER.header} feedback={FEEDBACK_AFTER} onDone={goNext} />
+      </TapNavWrapper>
     );
   }
 
-  if (phase === "done") {
-    return null;
-  }
+  return content;
+}
 
-  if (phase === "rest") {
-    return (
-      <RestScreen
-        seconds={10}
-        mascotUri={MASCOT_CELEBRATE}
-        tips={REST_TIPS}
-        onDone={() => setPhase("countdownAfter")}
-      />
-    );
-  }
-
+/* ============ طبقة ضغط شفافة: يمين = التالي، يسار = السابق ============ */
+function TapNavWrapper({ children, onPrev, onNext }) {
   return (
-    <CountdownScreen
-      seconds={3}
-      header={FEEDBACK_AFTER.header}
-      feedback={FEEDBACK_AFTER}
-      onDone={onFinish}
-    />
+    <View style={{ flex: 1 }}>
+      {children}
+      <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+        <View style={{ flexDirection: "row", flex: 1 }}>
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onPrev} />
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onNext} />
+        </View>
+      </View>
+    </View>
   );
 }
 
+/* ============ طبقة ضغط شفافة لشاشة الراحة ============ */
+// نفس فكرة يمين=التالي ويسار=السابق، بس المساحة الشفافة تغطي بس الجزء
+// العلوي (الماسكوت والعدّاد) وتوقف قبل ما توصل كاروسيل النصائح تحت —
+// عشان السحب يمين/يسار على كاروسيل النصائح يضل يشتغل عادي بدون تعارض.
+function RestTapNavWrapper({ children, onPrev, onNext }) {
+  return (
+    <View style={{ flex: 1 }}>
+      {children}
+      <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { height: SCREEN_H * 0.6 }]}>
+        <View style={{ flexDirection: "row", flex: 1 }}>
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onPrev} />
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onNext} />
+        </View>
+      </View>
+    </View>
+  );
+}
 /* ============ دائرة التقدّم (شغّالة) ============ */
 function Ring({ size, stroke, progress, color, track = colors.border, dashed, children }) {
   const radius = (size - stroke) / 2;
@@ -293,6 +328,8 @@ function RestScreen({ seconds, mascotUri, tips, onDone }) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.surface },
+
+
 
   /* العدّاد */
   countWrap: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 20 },
