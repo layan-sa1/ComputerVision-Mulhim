@@ -268,7 +268,6 @@ export default function App() {
 
       )}
 
-
       {/* =====================================================
           WORKOUT DETAILS
       ===================================================== */}
@@ -292,7 +291,6 @@ export default function App() {
         />
 
       )}
-
 
       {/* =====================================================
           COMPUTER VISION INTRO
@@ -452,5 +450,4 @@ export default function App() {
     </View>
 
   );
-
 }
