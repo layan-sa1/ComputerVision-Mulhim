@@ -18,7 +18,7 @@ const STATS = [
 ];
 
 export default function ShareSummary({ onClose }) {
-  const [continueWithAI, setContinueWithAI] = useState(false);
+  const [continueWithAI, setContinueWithAI] = useState(true); // افتراضيًا مفعّل بناءً على طلب المشرفة
 
   return (
     <SafeAreaView style={styles.safe}>
