@@ -6,30 +6,31 @@ import colors from "./Colors";
 
 import EXERCISES from "./ExercisesData";
 
-const SET_DURATION_SECONDS = 300; // 05:00 — مدة العد التنازلي لكل مجموعة
+const SET_DURATION_SECONDS = 300; // 05:00 — كانت مدة العد التنازلي، محفوظة كمرجع لو احتجناها لاحقًا
 
 export default function ActiveWorkout({ onBack, detecting = false, exerciseId, setIndex = 1, roundIndex = 1, setsPerRound = 3, totalRounds = 2, onFinishSet }) {
   const ex = EXERCISES.find((e) => e.id === exerciseId) || EXERCISES[0];
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [voiceGuidance, setVoiceGuidance] = useState(true);
   const [vibrateOnError, setVibrateOnError] = useState(true);
-  const [remainingSeconds, setRemainingSeconds] = useState(SET_DURATION_SECONDS);
+  // عدّاد يحسب الوقت من جديد (Stopwatch) بدل عدّاد تنازلي — يبدأ من صفر
+  // ويتصاعد، مو يعرض "وقت متبقي" من مدة ثابتة.
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
-  // يعيد ضبط العدّاد كل ما تبدأ مجموعة جديدة
+  // يعيد ضبط العدّاد على صفر كل ما تبدأ مجموعة جديدة — يحسب من جديد فعليًا
   useEffect(() => {
-    setRemainingSeconds(SET_DURATION_SECONDS);
+    setElapsedSeconds(0);
   }, [setIndex, roundIndex]);
 
   useEffect(() => {
-    if (remainingSeconds <= 0) return;
     const id = setInterval(() => {
-      setRemainingSeconds((s) => Math.max(0, s - 1));
+      setElapsedSeconds((s) => s + 1);
     }, 1000);
     return () => clearInterval(id);
-  }, [remainingSeconds > 0]);
+  }, [setIndex, roundIndex]);
 
-  const mm = String(Math.floor(remainingSeconds / 60)).padStart(2, "0");
-  const ss = String(remainingSeconds % 60).padStart(2, "0");
+  const mm = String(Math.floor(elapsedSeconds / 60)).padStart(2, "0");
+  const ss = String(elapsedSeconds % 60).padStart(2, "0");
 
   // تبديل بين كاميرتك والمدرب (زي مران) — "trainer" يعرض صورة/فيديو التمرين
   // المرجعي، و"camera" يعرض الكاميرا الحية.
@@ -122,7 +123,7 @@ export default function ActiveWorkout({ onBack, detecting = false, exerciseId, s
         <View style={styles.statCard}>
           <View style={styles.statLabelRow}>
             <Clock size={13} color={colors.primary} />
-            <Text style={styles.statLabel}>الوقت المتبقي</Text>
+            <Text style={styles.statLabel}>الوقت المنقضي</Text>
           </View>
           <Text style={styles.statValue}>{mm}:{ss}</Text>
           <Text style={styles.statUnit}>دقائق  ثواني</Text>
