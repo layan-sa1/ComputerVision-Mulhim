@@ -53,9 +53,8 @@ function ConfettiPiece({ index }) {
   );
 }
 
-export default function Celebration({ onContinue }) {
+export default function Celebration({ onContinue, onBack }) {
   // تختفي تلقائيًا بعد 6 ثواني وتروح للملخص، بدون ما يحتاج المستخدم يضغط.
-  // خليت مساحة الضغط شغالة برضه كخيار تخطي مبكر لو حبت تكمل بسرعة.
   useEffect(() => {
     const id = setTimeout(() => onContinue && onContinue(), 6000);
     return () => clearTimeout(id);
@@ -67,17 +66,23 @@ export default function Celebration({ onContinue }) {
         <ConfettiPiece key={i} index={i} />
       ))}
 
-      <TouchableOpacity style={styles.tapArea} activeOpacity={1} onPress={onContinue}>
-        <View style={styles.center}>
-          {mascotCelebrate ? (
-            <Image source={mascotCelebrate} style={styles.mascot} resizeMode="contain" />
-          ) : (
-            <View style={styles.mascotFallback} />
-          )}
-          <Text style={styles.title}>أحسنت! ✨</Text>
-          <Text style={styles.subtitle}>أكملت أول تمرين بنجاح</Text>
+      <View style={styles.center}>
+        {mascotCelebrate ? (
+          <Image source={mascotCelebrate} style={styles.mascot} resizeMode="contain" />
+        ) : (
+          <View style={styles.mascotFallback} />
+        )}
+        <Text style={styles.title}>أحسنت! ✨</Text>
+        <Text style={styles.subtitle}>أكملت أول تمرين بنجاح</Text>
+      </View>
+
+      {/* مساحتا ضغط شفافتان: يمين = متابعة، يسار = رجوع */}
+      <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+        <View style={{ flexDirection: "row", flex: 1 }}>
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onBack} />
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onContinue} />
         </View>
-      </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
