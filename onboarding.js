@@ -65,7 +65,7 @@ const STEPS = [
 // MAIN ONBOARDING
 // =====================================================
 
-export default function Onboarding({ onFinish = () => {} }) {
+export default function Onboarding({ onFinish = () => {}, onBack }) {
   const [current, setCurrent] = useState(0);
 
   const step = STEPS[current];
@@ -79,6 +79,15 @@ export default function Onboarding({ onFinish = () => {} }) {
     }
   };
 
+  // رجوع لخطوة سابقة، ولو إحنا بأول خطوة يرجع لمقدمة الميزة (CvIntro)
+  const prev = () => {
+    if (current === 0) {
+      onBack && onBack();
+    } else {
+      setCurrent((c) => c - 1);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
 
@@ -86,20 +95,33 @@ export default function Onboarding({ onFinish = () => {} }) {
 
       <View style={styles.header}>
 
-        <TouchableOpacity
-          onPress={onFinish}
-          hitSlop={{
-            top: 8,
-            bottom: 8,
-            left: 8,
-            right: 8,
-          }}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.skip}>
-            تخطي
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.headerTopRow}>
+
+          <TouchableOpacity
+            onPress={prev}
+            style={styles.backBtn}
+            hitSlop={8}
+            activeOpacity={0.75}
+          >
+            <Feather name="arrow-left" size={16} color={colors.primary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={onFinish}
+            hitSlop={{
+              top: 8,
+              bottom: 8,
+              left: 8,
+              right: 8,
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.skip}>
+              تخطي
+            </Text>
+          </TouchableOpacity>
+
+        </View>
 
         <View style={styles.progress}>
           {STEPS.map((item, i) => (
@@ -409,16 +431,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
   },
+  headerTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  backBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.card,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
 
   skip: {
-    alignSelf: "flex-end",
-
     fontSize: 13,
     fontWeight: "700",
 
     color: colors.primary,
-
-    marginBottom: 12,
   },
 
   progress: {
